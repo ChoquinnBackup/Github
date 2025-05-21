@@ -1,8 +1,9 @@
-import { StyleSheet, FlatList, ActivityIndicator, Image } from "react-native";
+import { StyleSheet, FlatList, ActivityIndicator, Image, Pressable } from "react-native";
 import { Text, View } from "@/components/Themed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
-import REACT_APP_GITHUB_TOKEN  from "react-native-dotenv";
+import { REACT_APP_GITHUB_TOKEN } from "@env";
+import { Link } from "expo-router";
 export interface IUserResponse {
   login: string;
   id: number;
@@ -39,16 +40,28 @@ export interface IUserResponse {
   updated_at: string;
 }
 
+
 export default function TabOneScreen() {
   const [error, setError] = useState<string | null>(null);
   const [issues, setIssues] = useState([]);
   const [user, setUser] = useState<IUserResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const LogOut = async () => {
+    setLoading(true);
+    try {
+      await AsyncStorage.removeItem("@username");
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const fetchGH = async () => {
     const storedUsername = await AsyncStorage.getItem("@username");
-    console.log("Nome de usuário armazenado:", storedUsername);
-    console.log("Token usado:", REACT_APP_GITHUB_TOKEN);
+    
 
     try {
       const response = await fetch(`https://api.github.com/users/${storedUsername}`, {
@@ -77,6 +90,7 @@ export default function TabOneScreen() {
   };
 
   useEffect(() => {
+    console.log("token: ", REACT_APP_GITHUB_TOKEN);
     const fetchUser = async () => {
       try {
         const storedUsername = await AsyncStorage.getItem("@username");
@@ -99,8 +113,8 @@ export default function TabOneScreen() {
       <Text style={styles.title}>{user?.login}</Text>
       <View
         style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
+        darkColor="#eee"
+        lightColor="rgba(255,255,255,0.1)"
       />
 
       {loading ? (
@@ -110,33 +124,50 @@ export default function TabOneScreen() {
           style={{
             justifyContent: "center",
             alignItems: "center",
+            backgroundColor: "#000",
           }}
         >
           <Image
             source={{ uri: user?.avatar_url }}
             style={{ width: 120, height: 120, borderRadius: 100, overflow: 'hidden', margin: 10 }}
           />
-          <Text style={{ fontSize: 18, color: "#000", fontWeight: "bold" }}>
+          <Text style={{ fontSize: 18, color: "#FFF", fontWeight: "bold" }}>
             {user?.name}
           </Text>
-          <Text style={{ fontSize: 14, color: "#777" }}>@{user?.login}</Text>
-          <Text style={{ margin: 5, color: "#777" }}>
+          <Text style={{ fontSize: 14, color: "#999" }}>@{user?.login}</Text>
+          <Text style={{ margin: 5, color: "#999" }}>
             Seguidores: {user?.followers} Seguindo: {user?.following}
           </Text>
 
           <View
             style={styles.separator}
-            lightColor="#eee"
-            darkColor="rgba(255,255,255,0.1)"
+            darkColor="#eee"
+            lightColor="rgba(255,255,255,0.1)"
           />
 
-          <Text style={{ fontSize: 18, color: "#000", textAlign: "center" }}>
+          <Text style={{ fontSize: 18, color: "#FFF", textAlign: "center" }}>
             {user?.bio}
           </Text>
 
-          <Text style={{ fontSize: 18, color: "#000", textAlign: "justify" }}>
+          <Text style={{ fontSize: 18, color: "#FFF", textAlign: "justify" }}>
             {user?.url}
           </Text>
+
+          <Pressable>
+              {({ pressed }) => (
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: pressed ? "#FFF" : "#007AFF",
+                    textAlign: "center",
+                  }}
+                  onPress={() => LogOut()}
+                >
+                    Sair
+                </Text>
+              )}
+           </Pressable>
+
         </View>
       )}
     </View>
@@ -145,6 +176,7 @@ export default function TabOneScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#000",
     flex: 1,
     padding: 16,
     paddingTop: 40,
@@ -153,6 +185,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     alignSelf: "center",
+    color: "#FFF"
   },
   separator: {
     marginVertical: 20,
@@ -162,7 +195,7 @@ const styles = StyleSheet.create({
   repoItem: {
     marginBottom: 15,
     padding: 10,
-    backgroundColor: "#ccc",
+    backgroundColor: "#333",
     borderRadius: 8,
   },
   repoName: {
