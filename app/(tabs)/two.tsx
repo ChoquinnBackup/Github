@@ -47,6 +47,9 @@ export default function TabOneScreen() {
 
   const fetchGH = async () => {
     const storedUsername = await AsyncStorage.getItem("@username");
+    console.log("Nome de usuário armazenado:", storedUsername);
+    console.log("Token usado:", REACT_APP_GITHUB_TOKEN);
+
     try {
       const response = await fetch(`https://api.github.com/users/${storedUsername}`, {
         headers: {
@@ -89,7 +92,6 @@ export default function TabOneScreen() {
 
     fetchGH();
     fetchUser();
-    console.log("token: ", process.env.REACT_APP_GITHUB_TOKEN);
   }, []);
 
   return (
@@ -118,6 +120,9 @@ export default function TabOneScreen() {
             {user?.name}
           </Text>
           <Text style={{ fontSize: 14, color: "#777" }}>@{user?.login}</Text>
+          <Text style={{ margin: 5, color: "#777" }}>
+            Seguidores: {user?.followers} Seguindo: {user?.following}
+          </Text>
 
           <View
             style={styles.separator}
@@ -125,15 +130,7 @@ export default function TabOneScreen() {
             darkColor="rgba(255,255,255,0.1)"
           />
 
-          <Text>
-            Seguidores: {user?.followers}
-          </Text>
-
-          <Text>
-            Seguindo: {user?.following}
-          </Text>
-
-          <Text style={{ fontSize: 18, color: "#000", textAlign: "justify" }}>
+          <Text style={{ fontSize: 18, color: "#000", textAlign: "center" }}>
             {user?.bio}
           </Text>
 
